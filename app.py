@@ -466,4 +466,4 @@ with gr.Blocks(css=custom_css) as rag_application:
     )
 
 if __name__ == "__main__":
-    rag_application.launch(server_name="0.0.0.0", server_port=7860, show_api=False)
+    rag_application.launch(server_name="0.0.0.0", server_port=7860)
