@@ -18,19 +18,18 @@ warnings.filterwarnings('ignore')
 
 ## LLM
 def get_llm():
-    # Connects to HuggingFace's free server. 
-    # Uses a HuggingFace token saved in your .env as HF_TOKEN
     llm = HuggingFaceEndpoint(
         repo_id="mistralai/Mistral-7B-Instruct-v0.3",
         task="text-generation",
-        max_new_tokens=256,
+        max_new_tokens=512,
         temperature=0.5,
     )
     return llm
 
 ## Document loader
 def document_loader(file):
-    # Depending on the Gradio version
+    if file is None:
+        return None
     file_path = file if isinstance(file, str) else file.name
     loader = PyPDFLoader(file_path)
     loaded_document = loader.load()
@@ -38,58 +37,175 @@ def document_loader(file):
 
 ## Text splitter
 def text_splitter(data):
-    text_splitter = RecursiveCharacterTextSplitter(
+    splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=100,
         length_function=len,
     )
-    chunks = text_splitter.split_documents(data)
+    chunks = splitter.split_documents(data)
     return chunks
 
 ## Embedding model
 def get_embedding():
-    # This model is free, small, and fast. 
-    # It runs locally on the server's CPU to calculate vectors (no external API calls required)
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 ## Vector db
 def vector_database(chunks):
     embedding_model = get_embedding()
-    # We save the processed chunks in Chroma
     vectordb = Chroma.from_documents(chunks, embedding_model)
     return vectordb
 
-## Retriever
-def retriever(file):
-    splits = document_loader(file)
-    chunks = text_splitter(splits)
-    vectordb = vector_database(chunks)
-    retriever_obj = vectordb.as_retriever()
-    return retriever_obj
-
-## QA Chain
+## QA Chain Logic
 def retriever_qa(file, query):
-    llm = get_llm()
-    retriever_obj = retriever(file)
-    qa = RetrievalQA.from_chain_type(llm=llm, 
-                                    chain_type="stuff", 
-                                    retriever=retriever_obj, 
-                                    return_source_documents=False)
-    response = qa.invoke(query)
-    return response['result']
+    if file is None:
+        return "ERROR: INSERT DISK (PDF) TO CONTINUE..."
+    if not query:
+        return "ERROR: NO COMMAND ENTERED."
+    
+    try:
+        llm = get_llm()
+        splits = document_loader(file)
+        chunks = text_splitter(splits)
+        vectordb = vector_database(chunks)
+        retriever_obj = vectordb.as_retriever()
+        
+        qa = RetrievalQA.from_chain_type(llm=llm, 
+                                        chain_type="stuff", 
+                                        retriever=retriever_obj, 
+                                        return_source_documents=False)
+        response = qa.invoke(query)
+        return response['result'].upper() # All caps for retro feel
+    except Exception as e:
+        return f"SYSTEM FAILURE: {str(e).upper()}"
 
-# Create Gradio interface
-rag_application = gr.Interface(
-    fn=retriever_qa,
-    inputs=[
-        gr.File(label="Upload PDF File", file_count="single", file_types=['.pdf'], type="filepath"),
-        gr.Textbox(label="Input Query", lines=2, placeholder="Type your question here...")
-    ],
-    outputs=gr.Textbox(label="Output"),
-    title="pdf bot",
-    description="Upload a PDF document and ask any question. Powered by free Open Source models."
-)
+# 8-BIT RETRO CSS
+custom_css = """
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --pixel-border: 4px solid #000;
+}
+
+* {
+    font-family: 'Press Start 2P', cursive !important;
+    text-transform: uppercase;
+}
+
+body {
+    background-color: #1a1a1a !important;
+}
+
+.container { 
+    max-width: 1000px; 
+    margin: auto; 
+    padding: 20px;
+    background: #2d2d2d;
+    border: 8px solid #000;
+    box-shadow: 10px 10px 0px #000;
+}
+
+.header { 
+    text-align: center; 
+    margin-bottom: 40px; 
+    padding: 20px;
+    border-bottom: 4px dashed #00ff00;
+}
+
+.header h1 { 
+    font-size: 2.5em; 
+    color: #00ff00;
+    text-shadow: 4px 4px 0px #000;
+}
+
+.header p { 
+    color: #ffff00; 
+    font-size: 0.8em; 
+    margin-top: 15px;
+}
+
+.gr-button-primary {
+    background-color: #ff00ff !important;
+    border: 4px solid #000 !important;
+    box-shadow: 4px 4px 0px #000 !important;
+    color: #fff !important;
+    font-size: 0.7em !important;
+}
+
+.gr-button-primary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000 !important;
+}
+
+input, textarea, .gr-box {
+    background-color: #000 !important;
+    color: #00ff00 !important;
+    border: 4px solid #fff !important;
+    border-radius: 0px !important;
+}
+
+label {
+    color: #00ffff !important;
+    font-size: 0.6em !important;
+    margin-bottom: 5px;
+}
+
+.footer { 
+    text-align: center; 
+    margin-top: 50px; 
+    color: #ff0000; 
+    font-size: 0.6em; 
+}
+
+/* Hide Gradio default styles that break the look */
+footer { display: none !important; }
+"""
+
+# Build the UI with gr.Blocks
+with gr.Blocks(theme=gr.themes.Default(), css=custom_css) as rag_application:
+    
+    with gr.Div(elem_classes="container"):
+        # Header
+        with gr.Div(elem_classes="header"):
+            gr.Markdown("# 👾 PDF BOT v1.0")
+            gr.Markdown("INSERT PDF DATA AND ASK THE SYSTEM")
+        
+        with gr.Row():
+            # Left Column: Terminal Input
+            with gr.Column(scale=1):
+                file_input = gr.File(
+                    label="[ DISK SLOT ]", 
+                    file_count="single", 
+                    file_types=['.pdf'], 
+                    type="filepath"
+                )
+                gr.Markdown("---")
+                gr.Markdown("### SYSTEM MANUAL")
+                gr.Markdown("1. LOAD PDF\n2. INPUT CMD\n3. EXECUTE")
+            
+            # Right Column: Output Console
+            with gr.Column(scale=2):
+                query_input = gr.Textbox(
+                    label="[ COMMAND LINE ]", 
+                    placeholder="TYPE QUERY HERE...", 
+                    lines=3
+                )
+                submit_btn = gr.Button("RUN EXECUTION", variant="primary")
+                output_text = gr.Textbox(
+                    label="[ SYSTEM OUTPUT ]", 
+                    interactive=False, 
+                    lines=10
+                )
+        
+        # Action
+        submit_btn.click(
+            fn=retriever_qa,
+            inputs=[file_input, query_input],
+            outputs=output_text
+        )
+
+        # Footer
+        with gr.Div(elem_classes="footer"):
+            gr.Markdown("== COMPATIBLE WITH ALL RETRO BROWSERS ==")
 
 if __name__ == "__main__":
-    # Launch the app
     rag_application.launch(server_name="0.0.0.0", server_port=7860)
