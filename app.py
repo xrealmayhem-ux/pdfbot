@@ -90,8 +90,11 @@ def retriever_qa(file, query):
 
         return chain.invoke(query)
 
-    except Exception as e:
-        return f"!!! SYSTEM HALT: {str(e)} !!!"
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return f"!!! SYSTEM HALT: {str(e)} !!!"
 
 
 ansi_art = """
