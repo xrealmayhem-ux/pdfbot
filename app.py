@@ -1,71 +1,81 @@
 import os
 from dotenv import load_dotenv
-import traceback
-import gradio as gr
-import warnings
+load_dotenv()
 
-# Langchain imports
 from langchain_huggingface import HuggingFaceEndpoint, HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.chains import RetrievalQA
-
-load_dotenv()
+import gradio as gr
+import warnings
 
 # Suppress warnings
+def warn(*args, **kwargs):
+    pass
+warnings.warn = warn
 warnings.filterwarnings('ignore')
 
 ## LLM
 def get_llm():
-    return HuggingFaceEndpoint(
-        repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    llm = HuggingFaceEndpoint(
+        repo_id="HuggingFaceH4/zephyr-7b-beta",
         max_new_tokens=512,
         temperature=0.5,
         huggingfacehub_api_token=os.environ.get("HF_TOKEN")
     )
+    return llm
 
-## Lógica de Procesamiento (Separada)
-def process_pdf(file):
+## Document loader
+def document_loader(file):
     if file is None:
-        return None, "!!! ERROR: NO FILE SELECTED !!!"
-    
-    try:
-        # Load
-        loader = PyPDFLoader(file.name)
-        data = loader.load()
-        
-        # Split
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-        chunks = splitter.split_documents(data)
-        
-        # Vector DB
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        vectordb = Chroma.from_documents(chunks, embeddings)
-        
-        return vectordb, "● SYSTEM: DOCUMENT LOADED & INDEXED"
-    except Exception as e:
-        traceback.print_exc()
-        return None, f"!!! SYSTEM HALT: {str(e)} !!!"
+        return None
+    file_path = file if isinstance(file, str) else file.name
+    loader = PyPDFLoader(file_path)
+    loaded_document = loader.load()
+    return loaded_document
 
-## Lógica de Consulta
-def ask_question(vectordb, query):
-    if vectordb is None:
-        return "!!! ERROR: PROCESS A DOCUMENT FIRST !!!"
+## Text splitter
+def text_splitter(data):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100,
+        length_function=len,
+    )
+    chunks = splitter.split_documents(data)
+    return chunks
+
+## Embedding model
+def get_embedding():
+    return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+## Vector db
+def vector_database(chunks):
+    embedding_model = get_embedding()
+    vectordb = Chroma.from_documents(chunks, embedding_model)
+    return vectordb
+
+## QA Chain Logic
+def retriever_qa(file, query):
+    if file is None:
+        return "!!! ERROR: NO INPUT DISK DETECTED !!!"
     if not query:
-        return "!!! ERROR: QUERY EMPTY !!!"
+        return "!!! ERROR: COMMAND LINE EMPTY !!!"
     
     try:
         llm = get_llm()
-        qa = RetrievalQA.from_chain_type(
-            llm=llm, 
-            chain_type="stuff", 
-            retriever=vectordb.as_retriever()
-        )
+        splits = document_loader(file)
+        chunks = text_splitter(splits)
+        vectordb = vector_database(chunks)
+        retriever_obj = vectordb.as_retriever()
+        
+        qa = RetrievalQA.from_chain_type(llm=llm, 
+                                        chain_type="stuff", 
+                                        retriever=retriever_obj, 
+                                        return_source_documents=False)
         response = qa.invoke(query)
         return response['result']
     except Exception as e:
-        traceback.print_exc()
         return f"!!! SYSTEM HALT: {str(e)} !!!"
 
 
@@ -93,7 +103,7 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: mixtral-8x7B</span>
+    <span class="stat">◈ MODEL: Zephyr-7B-beta</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
@@ -393,28 +403,66 @@ footer { display: none !important; }
 #   GRADIO UI
 # ╚══════════════════════════════════════════╝
 with gr.Blocks(css=custom_css) as rag_application:
-    # Estado para mantener la base de datos en memoria
-    vector_db_state = gr.State(None)
 
     with gr.Column(elem_classes="container"):
+
+        # Header
         gr.HTML(ansi_art)
 
         with gr.Row():
+
+            # ── LEFT PANEL ──
             with gr.Column(scale=1):
                 gr.HTML("<div class='panel-label'>◈ Input Node</div>")
-                file_input = gr.File(label="Load Document", type="filepath")
-                load_btn = gr.Button("⟫ Process Document") # Nuevo botón
-                status_output = gr.Textbox(label="Status", interactive=False)
-                
+                file_input = gr.File(
+                    label="Load Document",
+                    file_count="single",
+                    file_types=['.pdf'],
+                    type="filepath"
+                )
+                gr.HTML("<hr class='cyber-divider'>")
+                gr.HTML("""
+                <div class='panel-label'>◈ System Status</div>
+                <div class='sysinfo'>
+                  <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>Zephyr-7B-beta</span></div>
+                  <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
+                  <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
+                  <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
+                  <div><span class='key'>TOKENS  </span> <span class='val warn'>512 MAX</span></div>
+                </div>
+                """)
+
+            # ── RIGHT PANEL ──
             with gr.Column(scale=2):
                 gr.HTML("<div class='panel-label'>◈ Query Interface</div>")
-                query_input = gr.Textbox(label="Neural Prompt", placeholder="> ENTER QUERY..._", lines=3)
+                query_input = gr.Textbox(
+                    label="Neural Prompt",
+                    placeholder="> ENTER QUERY..._",
+                    lines=3
+                )
                 submit_btn = gr.Button("⟫ Execute Query", variant="primary")
-                output_text = gr.Textbox(label="System Response", interactive=False, lines=12)
+                gr.HTML("<div style='height:8px'></div>")
+                output_text = gr.Textbox(
+                    label="System Response",
+                    interactive=False,
+                    lines=12,
+                    elem_classes="output-text"
+                )
 
-        # Eventos
-        load_btn.click(process_pdf, inputs=[file_input], outputs=[vector_db_state, status_output])
-        submit_btn.click(ask_question, inputs=[vector_db_state, query_input], outputs=[output_text])
+        # Footer
+        gr.HTML("""
+        <div class='cyber-footer'>
+          <span>PDF-BOT SYSTEMS</span> &nbsp;/&nbsp; NEURAL INTERFACE v2.0
+          &nbsp;/&nbsp; ALL QUERIES PROCESSED LOCALLY
+        </div>
+        """)
+
+    submit_btn.click(
+        fn=retriever_qa,
+        inputs=[file_input, query_input],
+        outputs=output_text
+    )
 
 if __name__ == "__main__":
     rag_application.launch(server_name="0.0.0.0", server_port=7860)
