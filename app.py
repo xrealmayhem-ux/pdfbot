@@ -19,7 +19,7 @@ warnings.filterwarnings('ignore')
 ## LLM
 def get_llm():
     llm = HuggingFaceEndpoint(
-        repo_id="HuggingFaceH4/zephyr-7b-beta",
+        repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
         max_new_tokens=512,
         temperature=0.5,
         huggingfacehub_api_token=os.environ.get("HF_TOKEN")
@@ -103,7 +103,7 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: Zephyr-7B-beta</span>
+    <span class="stat">◈ MODEL: mistralai/Mixtral-8x7B</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
@@ -425,7 +425,7 @@ with gr.Blocks(css=custom_css) as rag_application:
                 <div class='panel-label'>◈ System Status</div>
                 <div class='sysinfo'>
                   <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
-                  <div><span class='key'>LLM     </span> <span class='val'>Zephyr-7B-beta</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>mistralai/Mixtral-8x7B</span></div>
                   <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
                   <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
                   <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
