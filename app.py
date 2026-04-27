@@ -6,7 +6,9 @@ from langchain_huggingface import HuggingFaceEndpoint, HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.chains import RetrievalQA
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 import gradio as gr
 import warnings
 
@@ -68,20 +70,30 @@ def retriever_qa(file, query):
         chunks = text_splitter(splits)
         vectordb = vector_database(chunks)
         retriever_obj = vectordb.as_retriever()
-        
-        qa = RetrievalQA.from_chain_type(llm=llm, 
-                                        chain_type="stuff", 
-                                        retriever=retriever_obj, 
-                                        return_source_documents=False)
-        response = qa.invoke(query)
-        return response['result']
+
+        prompt = PromptTemplate.from_template(
+            "Use the following context to answer the question.\n\n"
+            "Context: {context}\n\n"
+            "Question: {question}\n\n"
+            "Answer:"
+        )
+
+        def format_docs(docs):
+            return "\n\n".join(doc.page_content for doc in docs)
+
+        chain = (
+            {"context": retriever_obj | format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | llm
+            | StrOutputParser()
+        )
+
+        return chain.invoke(query)
+
     except Exception as e:
         return f"!!! SYSTEM HALT: {str(e)} !!!"
 
 
-# ╔══════════════════════════════════════════╗
-#   CYBERPUNK ANSI ART HEADER
-# ╚══════════════════════════════════════════╝
 ansi_art = """
 <div class="cyber-header">
   <div class="scanlines"></div>
@@ -103,17 +115,13 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: mistralai/Mixtral-8x7B</span>
+    <span class="stat">◈ MODEL: Mixtral-8x7B</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
 </div>
 """
 
-
-# ╔══════════════════════════════════════════╗
-#   CYBERPUNK CSS
-# ╚══════════════════════════════════════════╝
 custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -143,7 +151,6 @@ body, .gradio-container {
   font-family: var(--sans) !important;
 }
 
-/* ── HEADER ── */
 .cyber-header {
   position: relative;
   padding: 32px 24px 20px;
@@ -165,7 +172,6 @@ body, .gradio-container {
 }
 
 .scanlines { display: none; }
-
 .corner { display: none; }
 
 .ascii-title {
@@ -238,14 +244,12 @@ body, .gradio-container {
 
 .blink { animation: blink 1.2s step-end infinite; }
 
-/* ── MAIN CONTAINER ── */
 .container {
   max-width: 1020px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* ── PANEL LABEL ── */
 .panel-label {
   font-family: var(--sans) !important;
   font-size: 10px;
@@ -258,7 +262,6 @@ body, .gradio-container {
   border-bottom: 1px solid var(--border);
 }
 
-/* ── GRADIO LABELS ── */
 label, .gr-block label, span.svelte-1gfkfd6 {
   font-family: var(--sans) !important;
   color: var(--muted) !important;
@@ -271,7 +274,6 @@ label, .gr-block label, span.svelte-1gfkfd6 {
   text-shadow: none !important;
 }
 
-/* ── INPUTS ── */
 input, textarea,
 .gr-box, .gr-form,
 [data-testid="textbox"] textarea,
@@ -293,7 +295,6 @@ input:focus, textarea:focus {
   box-shadow: none !important;
 }
 
-/* ── FILE UPLOAD ── */
 .gr-file, [data-testid="file"] {
   background: var(--surface) !important;
   backdrop-filter: blur(12px) !important;
@@ -308,7 +309,6 @@ input:focus, textarea:focus {
   background: rgba(94,106,210,0.06) !important;
 }
 
-/* ── BUTTON ── */
 .gr-button-primary, button.primary {
   font-family: var(--sans) !important;
   font-weight: 600 !important;
@@ -330,7 +330,6 @@ input:focus, textarea:focus {
   transform: translateY(-1px);
 }
 
-/* ── OUTPUT BOX ── */
 [data-testid="textbox"][readonly] textarea,
 .output-text textarea {
   font-family: var(--mono) !important;
@@ -343,7 +342,6 @@ input:focus, textarea:focus {
   box-shadow: none !important;
 }
 
-/* ── SYSTEM INFO ── */
 .sysinfo {
   background: var(--surface);
   backdrop-filter: blur(12px);
@@ -360,7 +358,6 @@ input:focus, textarea:focus {
 .sysinfo .ok   { color: var(--ok); }
 .sysinfo .warn { color: var(--warn); }
 
-/* ── DIVIDER ── */
 .cyber-divider {
   border: none;
   border-top: 1px solid var(--border);
@@ -379,7 +376,6 @@ input:focus, textarea:focus {
   font-size: 10px;
 }
 
-/* ── FOOTER ── */
 .cyber-footer {
   text-align: center;
   margin-top: 20px;
@@ -398,20 +394,14 @@ input:focus, textarea:focus {
 footer { display: none !important; }
 """
 
-
-# ╔══════════════════════════════════════════╗
-#   GRADIO UI
-# ╚══════════════════════════════════════════╝
 with gr.Blocks(css=custom_css) as rag_application:
 
     with gr.Column(elem_classes="container"):
 
-        # Header
         gr.HTML(ansi_art)
 
         with gr.Row():
 
-            # ── LEFT PANEL ──
             with gr.Column(scale=1):
                 gr.HTML("<div class='panel-label'>◈ Input Node</div>")
                 file_input = gr.File(
@@ -425,7 +415,7 @@ with gr.Blocks(css=custom_css) as rag_application:
                 <div class='panel-label'>◈ System Status</div>
                 <div class='sysinfo'>
                   <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
-                  <div><span class='key'>LLM     </span> <span class='val'>mistralai/Mixtral-8x7B</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>Mixtral-8x7B</span></div>
                   <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
                   <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
                   <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
@@ -433,7 +423,6 @@ with gr.Blocks(css=custom_css) as rag_application:
                 </div>
                 """)
 
-            # ── RIGHT PANEL ──
             with gr.Column(scale=2):
                 gr.HTML("<div class='panel-label'>◈ Query Interface</div>")
                 query_input = gr.Textbox(
@@ -450,7 +439,6 @@ with gr.Blocks(css=custom_css) as rag_application:
                     elem_classes="output-text"
                 )
 
-        # Footer
         gr.HTML("""
         <div class='cyber-footer'>
           <span>PDF-BOT SYSTEMS</span> &nbsp;/&nbsp; NEURAL INTERFACE v2.0
