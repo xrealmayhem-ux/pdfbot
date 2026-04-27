@@ -1,17 +1,46 @@
----
-title: Pdfbot
-emoji: 💬
-colorFrom: yellow
-colorTo: purple
-sdk: gradio
-sdk_version: 6.5.1
-app_file: app.py
-pinned: false
-hf_oauth: true
-hf_oauth_scopes:
-- inference-api
-license: mit
-short_description: RAG Question Answering Bot
----
+# pdf bot
 
-An example chatbot using [Gradio](https://gradio.app), [`huggingface_hub`](https://huggingface.co/docs/huggingface_hub/v0.22.2/en/index), and the [Hugging Face Inference API](https://huggingface.co/docs/api-inference/index).
+A Retrieval-Augmented Generation (RAG) Question Answering Bot built with LangChain, ChromaDB, and Gradio. This project uses 100% free and open-source models via Hugging Face.
+
+## Features
+- **PDF Processing:** Upload PDF files to extract and analyze text.
+- **On-Server Embeddings:** Uses `sentence-transformers/all-MiniLM-L6-v2`, which runs directly on the hosting server's CPU. This means no external API calls or extra costs for vector generation.
+- **Vector Database:** Uses ChromaDB to store and retrieve document chunks efficiently.
+- **LLM:** Powered by `Mistral-7B-Instruct-v0.3` via the free Hugging Face Inference API.
+- **Web Interface:** Built with Gradio for a clean, user-friendly experience.
+
+## Prerequisites
+- Python 3.10 or 3.11
+- A [Hugging Face account](https://huggingface.co/) and an Access Token (Read permissions are sufficient).
+
+## Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd pdfbot
+   ```
+
+2. **Create a virtual environment (Conda is recommended):**
+   ```bash
+   conda create -n qabot_env python=3.10 -y
+   conda activate qabot_env
+   ```
+
+3. **Install the dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up the Environment Variables:**
+   Open the `.env` file and replace the placeholder with your actual Hugging Face token:
+   ```env
+   HF_TOKEN="your_huggingface_token_here"
+   ```
+
+## Usage
+Run the application using Python:
+```bash
+python app.py
+```
+This will start a local Gradio server. Open the provided link (usually `http://127.0.0.1:7860` or `http://localhost:7860`) in your web browser. Upload a PDF, wait a few seconds for it to process, and start asking questions!
