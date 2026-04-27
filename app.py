@@ -64,7 +64,7 @@ def retriever_qa(file, query):
     if not query:
         return "!!! ERROR: COMMAND LINE EMPTY !!!"
     
-    try:
+    try:                          # ← debe estar aquí
         llm = get_llm()
         splits = document_loader(file)
         chunks = text_splitter(splits)
@@ -90,11 +90,13 @@ def retriever_qa(file, query):
 
         return chain.invoke(query)
 
-        except Exception as e:
-            print(f"ERROR: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return f"!!! SYSTEM HALT: {str(e)} !!!"
+    except Exception as e:        # ← y el except al mismo nivel
+        print(f"ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return f"!!! SYSTEM HALT: {str(e)} !!!"
+
+        
 
 
 ansi_art = """
