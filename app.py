@@ -78,121 +78,378 @@ def retriever_qa(file, query):
     except Exception as e:
         return f"!!! SYSTEM HALT: {str(e)} !!!"
 
-# ANSI ART HEADER (HTML/CSS SIMULATION)
+
+# ╔══════════════════════════════════════════╗
+#   CYBERPUNK ANSI ART HEADER
+# ╚══════════════════════════════════════════╝
 ansi_art = """
-<pre style='line-height: 1.1; font-family: monospace; font-weight: bold; background: #000; padding: 20px; border: 4px double #555; text-align: center; color: #fff;'>
-<span style='color: #ff5555;'>  _____  </span><span style='color: #55ff55;'>_____  </span><span style='color: #5555ff;'>______ </span>  <span style='color: #ffff55;'>____  </span> <span style='color: #ff55ff;'> ____ </span><span style='color: #55ffff;'>_______ </span>
-<span style='color: #ff5555;'> |  __ \\</span><span style='color: #55ff55;'>|  __ \\</span><span style='color: #5555ff;'>|  ____|</span> <span style='color: #ffff55;'>|  _ \\ </span><span style='color: #ff55ff;'>/ __ \\</span><span style='color: #55ffff;'>__   __|</span>
-<span style='color: #ff5555;'> | |__) </span><span style='color: #55ff55;'>| |  | |</span><span style='color: #5555ff;'> |__   </span> <span style='color: #ffff55;'>| |_) |</span><span style='color: #ff55ff;'>| |  | |</span><span style='color: #55ffff;'>  | |   </span>
-<span style='color: #ff5555;'> |  ___/</span><span style='color: #55ff55;'>| |  | |</span><span style='color: #5555ff;'>  __|  </span> <span style='color: #ffff55;'>|  _ < </span><span style='color: #ff55ff;'>| |  | |</span><span style='color: #55ffff;'>  | |   </span>
-<span style='color: #ff5555;'> | |    </span><span style='color: #55ff55;'>| |__| |</span><span style='color: #5555ff;'> |     </span> <span style='color: #ffff55;'>| |_) |</span><span style='color: #ff55ff;'>| |__| |</span><span style='color: #55ffff;'>  | |   </span>
-<span style='color: #ff5555;'> |_|    </span><span style='color: #55ff55;'>|_____/</span><span style='color: #5555ff;'>|_|     </span> <span style='color: #ffff55;'>|____/ </span><span style='color: #ff55ff;'>\\____/ </span><span style='color: #55ffff;'> |_|   </span>
-<br>
-<span style='color: #aaa;'>[ VERSION 2.0 - BBS EDITION ]</span>
-</pre>
+<div class="cyber-header">
+  <div class="scanlines"></div>
+  <div class="corner tl">┌─</div>
+  <div class="corner tr">─┐</div>
+  <div class="corner bl">└─</div>
+  <div class="corner br">─┘</div>
+  <pre class="ascii-title">
+<span class="c1">██████╗ </span><span class="c2">██████╗ </span><span class="c3">███████╗</span>  <span class="c4">██████╗  </span><span class="c5">██████╗ </span><span class="c6">████████╗</span>
+<span class="c1">██╔══██╗</span><span class="c2">██╔══██╗</span><span class="c3">██╔════╝</span>  <span class="c4">██╔══██╗</span><span class="c5">██╔═══██╗</span><span class="c6">╚══██╔══╝</span>
+<span class="c1">██████╔╝</span><span class="c2">██║  ██║</span><span class="c3">█████╗  </span>  <span class="c4">██████╔╝</span><span class="c5">██║   ██║</span><span class="c6">   ██║   </span>
+<span class="c1">██╔═══╝ </span><span class="c2">██║  ██║</span><span class="c3">██╔══╝  </span>  <span class="c4">██╔══██╗</span><span class="c5">██║   ██║</span><span class="c6">   ██║   </span>
+<span class="c1">██║     </span><span class="c2">██████╔╝</span><span class="c3">██║     </span>  <span class="c4">██████╔╝</span><span class="c5">╚██████╔╝</span><span class="c6">   ██║   </span>
+<span class="c1">╚═╝     </span><span class="c2">╚═════╝ </span><span class="c3">╚═╝     </span>  <span class="c4">╚═════╝ </span><span class="c5"> ╚═════╝ </span><span class="c6">   ╚═╝   </span></pre>
+  <div class="tagline">
+    <span class="blink">▶</span>
+    NEURAL DOCUMENT INTERFACE &nbsp;/&nbsp; v2.0 CYBER EDITION
+    <span class="blink">◀</span>
+  </div>
+  <div class="status-bar">
+    <span class="stat online">● SYSTEM ONLINE</span>
+    <span class="stat">◈ MODEL: MISTRAL-7B</span>
+    <span class="stat">◈ EMBED: MiniLM-L6</span>
+    <span class="stat pulse">◈ AWAITING INPUT</span>
+  </div>
+</div>
 """
 
-# CLASSIC BBS / ANSI CSS
+
+# ╔══════════════════════════════════════════╗
+#   CYBERPUNK CSS
+# ╚══════════════════════════════════════════╝
 custom_css = """
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --cyan:    #00ffe7;
+  --magenta: #ff00aa;
+  --yellow:  #ffe600;
+  --green:   #39ff14;
+  --bg:      #050510;
+  --bg2:     #0a0a1a;
+  --border:  #1a1a3a;
+  --text:    #c8d8ff;
+  --dim:     #445577;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+
 body, .gradio-container {
-    background-color: #0000aa !important; /* Classic BBS Blue */
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  min-height: 100vh;
 }
 
-.container { 
-    max-width: 950px; 
-    margin: auto; 
-    padding: 20px;
-    background: #000000;
-    border: 5px solid #aaaaaa;
-    box-shadow: 15px 15px 0px #000;
+/* ── HEADER ── */
+.cyber-header {
+  position: relative;
+  padding: 28px 20px 16px;
+  background: linear-gradient(180deg, #0a0028 0%, #050510 100%);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 30px #00ffe720, inset 0 0 60px #00005520;
+  overflow: hidden;
+  margin-bottom: 4px;
 }
 
-* {
-    font-family: 'Courier New', Courier, monospace !important;
+.scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
-label {
-    background: #aaaaaa !important;
-    color: #000000 !important;
-    padding: 2px 10px !important;
-    font-weight: bold !important;
-    text-transform: uppercase;
+.corner {
+  position: absolute;
+  font-size: 14px;
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+  z-index: 2;
+}
+.tl { top: 6px;  left: 8px; }
+.tr { top: 6px;  right: 8px; }
+.bl { bottom: 6px; left: 8px; }
+.br { bottom: 6px; right: 8px; }
+
+.ascii-title {
+  font-size: clamp(5px, 1.1vw, 11px);
+  line-height: 1.15;
+  text-align: center;
+  margin: 0 0 10px;
+  letter-spacing: 0;
+  position: relative;
+  z-index: 2;
 }
 
-input, textarea, .gr-box, .gr-form {
-    background-color: #000 !important;
-    color: #ffffff !important;
-    border: 2px solid #555555 !important;
-    border-radius: 0px !important;
+.c1 { color: #ff00aa; text-shadow: 0 0 10px #ff00aa88; }
+.c2 { color: #ff6600; text-shadow: 0 0 10px #ff660088; }
+.c3 { color: #ffe600; text-shadow: 0 0 10px #ffe60088; }
+.c4 { color: #39ff14; text-shadow: 0 0 10px #39ff1488; }
+.c5 { color: #00ffe7; text-shadow: 0 0 10px #00ffe788; }
+.c6 { color: #bf5fff; text-shadow: 0 0 10px #bf5fff88; }
+
+.tagline {
+  text-align: center;
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  text-shadow: 0 0 10px var(--cyan);
+  position: relative;
+  z-index: 2;
 }
 
-.gr-button-primary {
-    background-color: #00aaaa !important;
-    color: #ffffff !important;
-    border: 2px solid #ffffff !important;
-    border-radius: 0px !important;
-    font-weight: bold !important;
-    text-transform: uppercase;
+.status-bar {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
-.gr-button-primary:hover {
-    background-color: #ffffff !important;
-    color: #00aaaa !important;
+.stat        { color: var(--dim); }
+.stat.online { color: var(--green); text-shadow: 0 0 8px var(--green); }
+.stat.pulse  { color: var(--yellow); text-shadow: 0 0 8px var(--yellow); animation: flicker 3s infinite; }
+
+@keyframes flicker {
+  0%,95%,100% { opacity: 1; }
+  96%          { opacity: 0.3; }
+  97%          { opacity: 1; }
+  98%          { opacity: 0.5; }
 }
 
-.footer { 
-    text-align: center; 
-    margin-top: 30px; 
-    color: #aaaaaa; 
-    font-weight: bold;
+@keyframes blink {
+  0%,49%  { opacity: 1; }
+  50%,100% { opacity: 0; }
 }
+
+.blink { animation: blink 1s step-end infinite; }
+
+/* ── MAIN CONTAINER ── */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+
+/* ── PANEL TITLES ── */
+.panel-label {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--cyan);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+/* ── LABELS ── */
+label, .gr-block label, span.svelte-1gfkfd6 {
+  color: var(--cyan) !important;
+  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-weight: normal !important;
+  text-shadow: 0 0 6px var(--cyan) !important;
+}
+
+/* ── INPUTS ── */
+input, textarea,
+.gr-box, .gr-form,
+[data-testid="textbox"] textarea,
+.gr-input, .gr-text-input {
+  background: #050515 !important;
+  color: var(--green) !important;
+  border: 1px solid #1a3a3a !important;
+  border-radius: 0 !important;
+  caret-color: var(--cyan) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 12px #00ffe720, inset 0 0 20px #00ffe708 !important;
+  outline: none !important;
+}
+
+/* ── FILE UPLOAD ── */
+.gr-file, [data-testid="file"] {
+  background: #050515 !important;
+  border: 1px dashed #1a4a4a !important;
+  border-radius: 0 !important;
+  color: var(--text) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.gr-file:hover {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 16px #00ffe718 !important;
+}
+
+/* ── BUTTON ── */
+.gr-button-primary, button.primary {
+  background: transparent !important;
+  color: var(--cyan) !important;
+  border: 1px solid var(--cyan) !important;
+  border-radius: 0 !important;
+  font-size: 11px !important;
+  letter-spacing: 4px !important;
+  text-transform: uppercase !important;
+  font-family: 'Orbitron', monospace !important;
+  padding: 12px 24px !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+  text-shadow: 0 0 8px var(--cyan) !important;
+  box-shadow: 0 0 16px #00ffe718, inset 0 0 16px #00ffe705 !important;
+}
+
+.gr-button-primary:hover, button.primary:hover {
+  background: var(--cyan) !important;
+  color: #000 !important;
+  box-shadow: 0 0 30px #00ffe760, inset 0 0 20px #00ffe720 !important;
+  text-shadow: none !important;
+}
+
+/* ── OUTPUT BOX ── */
+[data-testid="textbox"][readonly] textarea,
+.output-text textarea {
+  background: #020210 !important;
+  color: var(--green) !important;
+  border: 1px solid #0a2a0a !important;
+  border-left: 2px solid var(--green) !important;
+  box-shadow: inset 0 0 30px #00ff0808 !important;
+}
+
+/* ── SYSTEM INFO ── */
+.sysinfo {
+  border: 1px solid #1a1a3a;
+  padding: 12px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 2;
+}
+
+.sysinfo .key   { color: var(--magenta); text-shadow: 0 0 6px #ff00aa66; }
+.sysinfo .val   { color: var(--text); }
+.sysinfo .ok    { color: var(--green); }
+.sysinfo .warn  { color: var(--yellow); animation: flicker 4s infinite; }
+
+/* ── DIVIDER ── */
+.cyber-divider {
+  border: none;
+  border-top: 1px solid #1a1a3a;
+  margin: 16px 0;
+  position: relative;
+}
+
+.cyber-divider::after {
+  content: '◈';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg2);
+  padding: 0 8px;
+  color: var(--dim);
+  font-size: 10px;
+}
+
+/* ── FOOTER ── */
+.cyber-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 12px;
+  border-top: 1px solid #1a1a3a;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 3px;
+}
+
+.cyber-footer span { color: var(--magenta); text-shadow: 0 0 6px #ff00aa66; }
 
 footer { display: none !important; }
 """
 
+
+# ╔══════════════════════════════════════════╗
+#   GRADIO UI
+# ╚══════════════════════════════════════════╝
 with gr.Blocks(css=custom_css) as rag_application:
-    
+
     with gr.Column(elem_classes="container"):
-        # ANSI Art Header
+
+        # Header
         gr.HTML(ansi_art)
-        
+
         with gr.Row():
-            # Side Panel
+
+            # ── LEFT PANEL ──
             with gr.Column(scale=1):
+                gr.HTML("<div class='panel-label'>◈ Input Node</div>")
                 file_input = gr.File(
-                    label="FILE UPLOAD", 
-                    file_count="single", 
-                    file_types=['.pdf'], 
+                    label="Load Document",
+                    file_count="single",
+                    file_types=['.pdf'],
                     type="filepath"
                 )
-                gr.Markdown("---")
-                gr.Markdown("### SYSTEM INFO")
-                gr.Markdown("- **STATUS:** ONLINE\n- **CPU:** 80386\n- **BAUD:** 14400")
-            
-            # Main Console
+                gr.HTML("<hr class='cyber-divider'>")
+                gr.HTML("""
+                <div class='panel-label'>◈ System Status</div>
+                <div class='sysinfo'>
+                  <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>Mistral-7B-v0.3</span></div>
+                  <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
+                  <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
+                  <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
+                  <div><span class='key'>TOKENS  </span> <span class='val warn'>512 MAX</span></div>
+                </div>
+                """)
+
+            # ── RIGHT PANEL ──
             with gr.Column(scale=2):
+                gr.HTML("<div class='panel-label'>◈ Query Interface</div>")
                 query_input = gr.Textbox(
-                    label="PROMPT", 
-                    placeholder="ENTER QUERY...", 
+                    label="Neural Prompt",
+                    placeholder="> ENTER QUERY..._",
                     lines=3
                 )
-                submit_btn = gr.Button("EXECUTE COMMAND", variant="primary")
+                submit_btn = gr.Button("⟫ Execute Query", variant="primary")
+                gr.HTML("<div style='height:8px'></div>")
                 output_text = gr.Textbox(
-                    label="SYSTEM RESPONSE", 
-                    interactive=False, 
-                    lines=12
+                    label="System Response",
+                    interactive=False,
+                    lines=12,
+                    elem_classes="output-text"
                 )
-        
-        # Action
-        submit_btn.click(
-            fn=retriever_qa,
-            inputs=[file_input, query_input],
-            outputs=output_text
-        )
 
         # Footer
-        with gr.Column(elem_classes="footer"):
-            gr.Markdown("(C) 1992 PDF-BOT SYSTEMS UNLIMITED")
+        gr.HTML("""
+        <div class='cyber-footer'>
+          <span>PDF-BOT SYSTEMS</span> &nbsp;/&nbsp; NEURAL INTERFACE v2.0
+          &nbsp;/&nbsp; ALL QUERIES PROCESSED LOCALLY
+        </div>
+        """)
+
+    submit_btn.click(
+        fn=retriever_qa,
+        inputs=[file_input, query_input],
+        outputs=output_text
+    )
 
 if __name__ == "__main__":
     rag_application.launch(server_name="0.0.0.0", server_port=7860)
