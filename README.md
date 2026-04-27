@@ -1,3 +1,14 @@
+---
+title: pdf bot
+emoji: 📄
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 5.13.0
+app_file: app.py
+pinned: false
+---
+
 # pdf bot
 
 A Retrieval-Augmented Generation (RAG) Question Answering Bot built with LangChain, ChromaDB, and Gradio. This project uses 100% free and open-source models via Hugging Face.
@@ -11,7 +22,7 @@ A Retrieval-Augmented Generation (RAG) Question Answering Bot built with LangCha
 
 ## Prerequisites
 - Python 3.10 or 3.11
-- A [Hugging Face account](https://huggingface.co/) and an Access Token (Read permissions are sufficient).
+- A [Hugging Face account](https://huggingface.co/) and an Access Token.
 
 ## Setup Instructions
 
@@ -43,4 +54,4 @@ Run the application using Python:
 ```bash
 python app.py
 ```
-This will start a local Gradio server. Open the provided link (usually `http://127.0.0.1:7860` or `http://localhost:7860`) in your web browser. Upload a PDF, wait a few seconds for it to process, and start asking questions!
+This will start a local Gradio server. Upload a PDF, wait a few seconds for it to process, and start asking questions!
