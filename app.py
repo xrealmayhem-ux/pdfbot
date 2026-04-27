@@ -20,7 +20,8 @@ warnings.filterwarnings('ignore')
 def get_llm():
     llm = HuggingFaceEndpoint(
         repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-        task="conversational",
+        task="text-generation",
+        provider="hf-inference"
         max_new_tokens=512,
         temperature=0.5,
         huggingfacehub_api_token=os.environ.get("HF_TOKEN")
