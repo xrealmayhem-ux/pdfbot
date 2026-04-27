@@ -1,69 +1,95 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+from langchain_huggingface import HuggingFaceEndpoint, HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_classic.chains import RetrievalQA
 import gradio as gr
-from huggingface_hub import InferenceClient
+import warnings
 
+# Suppress warnings
+def warn(*args, **kwargs):
+    pass
+warnings.warn = warn
+warnings.filterwarnings('ignore')
 
-def respond(
-    message,
-    history: list[dict[str, str]],
-    system_message,
-    max_tokens,
-    temperature,
-    top_p,
-    hf_token: gr.OAuthToken,
-):
-    """
-    For more information on `huggingface_hub` Inference API support, please check the docs: https://huggingface.co/docs/huggingface_hub/v0.22.2/en/guides/inference
-    """
-    client = InferenceClient(token=hf_token.token, model="openai/gpt-oss-20b")
+## LLM
+def get_llm():
+    # Connects to HuggingFace's free server. 
+    # Uses a HuggingFace token saved in your .env as HF_TOKEN
+    llm = HuggingFaceEndpoint(
+        repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+        task="text-generation",
+        max_new_tokens=256,
+        temperature=0.5,
+    )
+    return llm
 
-    messages = [{"role": "system", "content": system_message}]
+## Document loader
+def document_loader(file):
+    # Depending on the Gradio version
+    file_path = file if isinstance(file, str) else file.name
+    loader = PyPDFLoader(file_path)
+    loaded_document = loader.load()
+    return loaded_document
 
-    messages.extend(history)
+## Text splitter
+def text_splitter(data):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100,
+        length_function=len,
+    )
+    chunks = text_splitter.split_documents(data)
+    return chunks
 
-    messages.append({"role": "user", "content": message})
+## Embedding model
+def get_embedding():
+    # This model is free, small, and fast. 
+    # It runs locally on the server's CPU to calculate vectors (no external API calls required)
+    return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    response = ""
+## Vector db
+def vector_database(chunks):
+    embedding_model = get_embedding()
+    # We save the processed chunks in Chroma
+    vectordb = Chroma.from_documents(chunks, embedding_model)
+    return vectordb
 
-    for message in client.chat_completion(
-        messages,
-        max_tokens=max_tokens,
-        stream=True,
-        temperature=temperature,
-        top_p=top_p,
-    ):
-        choices = message.choices
-        token = ""
-        if len(choices) and choices[0].delta.content:
-            token = choices[0].delta.content
+## Retriever
+def retriever(file):
+    splits = document_loader(file)
+    chunks = text_splitter(splits)
+    vectordb = vector_database(chunks)
+    retriever_obj = vectordb.as_retriever()
+    return retriever_obj
 
-        response += token
-        yield response
+## QA Chain
+def retriever_qa(file, query):
+    llm = get_llm()
+    retriever_obj = retriever(file)
+    qa = RetrievalQA.from_chain_type(llm=llm, 
+                                    chain_type="stuff", 
+                                    retriever=retriever_obj, 
+                                    return_source_documents=False)
+    response = qa.invoke(query)
+    return response['result']
 
-
-"""
-For information on how to customize the ChatInterface, peruse the gradio docs: https://www.gradio.app/docs/chatinterface
-"""
-chatbot = gr.ChatInterface(
-    respond,
-    additional_inputs=[
-        gr.Textbox(value="You are a friendly Chatbot.", label="System message"),
-        gr.Slider(minimum=1, maximum=2048, value=512, step=1, label="Max new tokens"),
-        gr.Slider(minimum=0.1, maximum=4.0, value=0.7, step=0.1, label="Temperature"),
-        gr.Slider(
-            minimum=0.1,
-            maximum=1.0,
-            value=0.95,
-            step=0.05,
-            label="Top-p (nucleus sampling)",
-        ),
+# Create Gradio interface
+rag_application = gr.Interface(
+    fn=retriever_qa,
+    inputs=[
+        gr.File(label="Upload PDF File", file_count="single", file_types=['.pdf'], type="filepath"),
+        gr.Textbox(label="Input Query", lines=2, placeholder="Type your question here...")
     ],
+    outputs=gr.Textbox(label="Output"),
+    title="pdf bot",
+    description="Upload a PDF document and ask any question. Powered by free Open Source models."
 )
 
-with gr.Blocks() as demo:
-    with gr.Sidebar():
-        gr.LoginButton()
-    chatbot.render()
-
-
 if __name__ == "__main__":
-    demo.launch()
+    # Launch the app
+    rag_application.launch(server_name="0.0.0.0", server_port=7860)
