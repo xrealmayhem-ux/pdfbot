@@ -118,15 +118,15 @@ custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
 
 :root {
-  --cyan:    #00ffe7;
-  --magenta: #ff00aa;
-  --yellow:  #ffe600;
-  --green:   #39ff14;
-  --bg:      #050510;
-  --bg2:     #0a0a1a;
-  --border:  #1a1a3a;
-  --text:    #c8d8ff;
-  --dim:     #445577;
+  --cyan:    #00cc88;
+  --magenta: #ffb000;
+  --yellow:  #ccff00;
+  --green:   #00ff5f;
+  --bg:      #0c0c0c;
+  --bg2:     #111111;
+  --border:  #1f2f1f;
+  --text:    #b0d0b0;
+  --dim:     #3a5a3a;
 }
 
 *, *::before, *::after {
@@ -144,9 +144,9 @@ body, .gradio-container {
 .cyber-header {
   position: relative;
   padding: 28px 20px 16px;
-  background: linear-gradient(180deg, #0a0028 0%, #050510 100%);
-  border: 1px solid var(--cyan);
-  box-shadow: 0 0 30px #00ffe720, inset 0 0 60px #00005520;
+  background: linear-gradient(180deg, #0a1a0a 0%, #0c0c0c 100%);
+  border: 1px solid #00cc88;
+  box-shadow: 0 0 30px #00cc8818, inset 0 0 60px #00ff0008;
   overflow: hidden;
   margin-bottom: 4px;
 }
@@ -186,12 +186,12 @@ body, .gradio-container {
   z-index: 2;
 }
 
-.c1 { color: #ff00aa; text-shadow: 0 0 10px #ff00aa88; }
-.c2 { color: #ff6600; text-shadow: 0 0 10px #ff660088; }
-.c3 { color: #ffe600; text-shadow: 0 0 10px #ffe60088; }
-.c4 { color: #39ff14; text-shadow: 0 0 10px #39ff1488; }
-.c5 { color: #00ffe7; text-shadow: 0 0 10px #00ffe788; }
-.c6 { color: #bf5fff; text-shadow: 0 0 10px #bf5fff88; }
+.c1 { color: #00ff5f; text-shadow: 0 0 10px #00ff5f88; }
+.c2 { color: #00cc88; text-shadow: 0 0 10px #00cc8888; }
+.c3 { color: #ccff00; text-shadow: 0 0 10px #ccff0088; }
+.c4 { color: #00ff5f; text-shadow: 0 0 10px #00ff5f88; }
+.c5 { color: #00cc88; text-shadow: 0 0 10px #00cc8888; }
+.c6 { color: #ffb000; text-shadow: 0 0 10px #ffb00088; }
 
 .tagline {
   text-align: center;
@@ -345,7 +345,7 @@ input:focus, textarea:focus {
   line-height: 2;
 }
 
-.sysinfo .key   { color: var(--magenta); text-shadow: 0 0 6px #ff00aa66; }
+.sysinfo .key   { color: #ffb000; text-shadow: 0 0 6px #ffb00066; }
 .sysinfo .val   { color: var(--text); }
 .sysinfo .ok    { color: var(--green); }
 .sysinfo .warn  { color: var(--yellow); animation: flicker 4s infinite; }
@@ -380,7 +380,7 @@ input:focus, textarea:focus {
   letter-spacing: 3px;
 }
 
-.cyber-footer span { color: var(--magenta); text-shadow: 0 0 6px #ff00aa66; }
+.cyber-footer span { color: #ffb000; text-shadow: 0 0 6px #ffb00066; }
 
 footer { display: none !important; }
 """
@@ -452,4 +452,4 @@ with gr.Blocks(css=custom_css) as rag_application:
     )
 
 if __name__ == "__main__":
-    rag_application.launch(server_name="0.0.0.0", server_port=7860)
+    rag_application.launch(server_name="[IP_ADDRESS]", server_port=7860)
