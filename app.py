@@ -163,9 +163,9 @@ footer { display: none !important; }
 # Build the UI with gr.Blocks
 with gr.Blocks(theme=gr.themes.Default(), css=custom_css) as rag_application:
     
-    with gr.Div(elem_classes="container"):
+    with gr.Column(elem_classes="container"):
         # Header
-        with gr.Div(elem_classes="header"):
+        with gr.Column(elem_classes="header"):
             gr.Markdown("# 👾 PDF BOT v1.0")
             gr.Markdown("INSERT PDF DATA AND ASK THE SYSTEM")
         
@@ -204,7 +204,7 @@ with gr.Blocks(theme=gr.themes.Default(), css=custom_css) as rag_application:
         )
 
         # Footer
-        with gr.Div(elem_classes="footer"):
+        with gr.Column(elem_classes="footer"):
             gr.Markdown("== COMPATIBLE WITH ALL RETRO BROWSERS ==")
 
 if __name__ == "__main__":
