@@ -58,9 +58,9 @@ def vector_database(chunks):
 ## QA Chain Logic
 def retriever_qa(file, query):
     if file is None:
-        return "ERROR: INSERT DISK (PDF) TO CONTINUE..."
+        return "!!! ERROR: NO INPUT DISK DETECTED !!!"
     if not query:
-        return "ERROR: NO COMMAND ENTERED."
+        return "!!! ERROR: COMMAND LINE EMPTY !!!"
     
     try:
         llm = get_llm()
@@ -74,132 +74,113 @@ def retriever_qa(file, query):
                                         retriever=retriever_obj, 
                                         return_source_documents=False)
         response = qa.invoke(query)
-        return response['result'].upper() # All caps for retro feel
+        return response['result']
     except Exception as e:
-        return f"SYSTEM FAILURE: {str(e).upper()}"
+        return f"!!! SYSTEM HALT: {str(e)} !!!"
 
-# 8-BIT NEON RETRO CSS
+# ANSI ART HEADER (HTML/CSS SIMULATION)
+ansi_art = """
+<pre style='line-height: 1.1; font-family: monospace; font-weight: bold; background: #000; padding: 20px; border: 4px double #555; text-align: center; color: #fff;'>
+<span style='color: #ff5555;'>  _____  </span><span style='color: #55ff55;'>_____  </span><span style='color: #5555ff;'>______ </span>  <span style='color: #ffff55;'>____  </span> <span style='color: #ff55ff;'> ____ </span><span style='color: #55ffff;'>_______ </span>
+<span style='color: #ff5555;'> |  __ \\</span><span style='color: #55ff55;'>|  __ \\</span><span style='color: #5555ff;'>|  ____|</span> <span style='color: #ffff55;'>|  _ \\ </span><span style='color: #ff55ff;'>/ __ \\</span><span style='color: #55ffff;'>__   __|</span>
+<span style='color: #ff5555;'> | |__) </span><span style='color: #55ff55;'>| |  | |</span><span style='color: #5555ff;'> |__   </span> <span style='color: #ffff55;'>| |_) |</span><span style='color: #ff55ff;'>| |  | |</span><span style='color: #55ffff;'>  | |   </span>
+<span style='color: #ff5555;'> |  ___/</span><span style='color: #55ff55;'>| |  | |</span><span style='color: #5555ff;'>  __|  </span> <span style='color: #ffff55;'>|  _ < </span><span style='color: #ff55ff;'>| |  | |</span><span style='color: #55ffff;'>  | |   </span>
+<span style='color: #ff5555;'> | |    </span><span style='color: #55ff55;'>| |__| |</span><span style='color: #5555ff;'> |     </span> <span style='color: #ffff55;'>| |_) |</span><span style='color: #ff55ff;'>| |__| |</span><span style='color: #55ffff;'>  | |   </span>
+<span style='color: #ff5555;'> |_|    </span><span style='color: #55ff55;'>|_____/</span><span style='color: #5555ff;'>|_|     </span> <span style='color: #ffff55;'>|____/ </span><span style='color: #ff55ff;'>\\____/ </span><span style='color: #55ffff;'> |_|   </span>
+<br>
+<span style='color: #aaa;'>[ VERSION 2.0 - BBS EDITION ]</span>
+</pre>
+"""
+
+# CLASSIC BBS / ANSI CSS
 custom_css = """
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-* {
-    font-family: 'Press Start 2P', cursive !important;
-    text-transform: uppercase;
-}
-
 body, .gradio-container {
-    background-color: #000000 !important;
+    background-color: #0000aa !important; /* Classic BBS Blue */
 }
 
 .container { 
-    max-width: 1000px; 
+    max-width: 950px; 
     margin: auto; 
     padding: 20px;
     background: #000000;
-    border: 6px solid #00ff00;
-    box-shadow: 0 0 20px #00ff00;
+    border: 5px solid #aaaaaa;
+    box-shadow: 15px 15px 0px #000;
 }
 
-.header { 
-    text-align: center; 
-    margin-bottom: 40px; 
-    padding: 20px;
-    border-bottom: 4px dashed #ff00ff;
+* {
+    font-family: 'Courier New', Courier, monospace !important;
 }
 
-.header h1 { 
-    font-size: 2.5em; 
-    color: #00ffff;
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-}
-
-.header p { 
-    color: #ff00ff; 
-    font-size: 0.8em; 
-    margin-top: 15px;
-    text-shadow: 0 0 5px #ff00ff;
-}
-
-.gr-button-primary {
-    background-color: #000000 !important;
-    border: 4px solid #ffff00 !important;
-    box-shadow: 0 0 10px #ffff00 !important;
-    color: #ffff00 !important;
-    font-size: 0.8em !important;
-}
-
-.gr-button-primary:hover {
-    background-color: #ffff00 !important;
-    color: #000 !important;
-    box-shadow: 0 0 30px #ffff00 !important;
+label {
+    background: #aaaaaa !important;
+    color: #000000 !important;
+    padding: 2px 10px !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
 }
 
 input, textarea, .gr-box, .gr-form {
     background-color: #000 !important;
-    color: #00ff00 !important;
-    border: 3px solid #00ffff !important;
+    color: #ffffff !important;
+    border: 2px solid #555555 !important;
     border-radius: 0px !important;
-    box-shadow: inset 0 0 10px #00ffff !important;
 }
 
-label {
-    color: #ff00ff !important;
-    font-size: 0.7em !important;
-    margin-bottom: 8px;
-    text-shadow: 0 0 5px #ff00ff;
+.gr-button-primary {
+    background-color: #00aaaa !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 0px !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+}
+
+.gr-button-primary:hover {
+    background-color: #ffffff !important;
+    color: #00aaaa !important;
 }
 
 .footer { 
     text-align: center; 
-    margin-top: 50px; 
-    color: #00ff00; 
-    font-size: 0.6em;
-    text-shadow: 0 0 5px #00ff00;
-}
-
-/* Customizing the file upload area */
-.file-preview {
-    background: #000 !important;
-    border: 2px solid #00ff00 !important;
+    margin-top: 30px; 
+    color: #aaaaaa; 
+    font-weight: bold;
 }
 
 footer { display: none !important; }
 """
 
-# Build the UI with gr.Blocks
-with gr.Blocks(theme=gr.themes.Default(), css=custom_css) as rag_application:
+with gr.Blocks(css=custom_css) as rag_application:
     
     with gr.Column(elem_classes="container"):
-        # Header
-        with gr.Column(elem_classes="header"):
-            gr.Markdown("# 👾 PDF BOT v1.0")
-            gr.Markdown("INSERT PDF DATA AND ASK THE SYSTEM")
+        # ANSI Art Header
+        gr.HTML(ansi_art)
         
         with gr.Row():
-            # Left Column: Terminal Input
+            # Side Panel
             with gr.Column(scale=1):
                 file_input = gr.File(
-                    label="[ DISK SLOT ]", 
+                    label="FILE UPLOAD", 
                     file_count="single", 
                     file_types=['.pdf'], 
                     type="filepath"
                 )
                 gr.Markdown("---")
-                gr.Markdown("### SYSTEM MANUAL")
-                gr.Markdown("1. LOAD PDF\n2. INPUT CMD\n3. EXECUTE")
+                gr.Markdown("### SYSTEM INFO")
+                gr.Markdown("- **STATUS:** ONLINE\n- **CPU:** 80386\n- **BAUD:** 14400")
             
-            # Right Column: Output Console
+            # Main Console
             with gr.Column(scale=2):
                 query_input = gr.Textbox(
-                    label="[ COMMAND LINE ]", 
-                    placeholder="TYPE QUERY HERE...", 
+                    label="PROMPT", 
+                    placeholder="ENTER QUERY...", 
                     lines=3
                 )
-                submit_btn = gr.Button("RUN EXECUTION", variant="primary")
+                submit_btn = gr.Button("EXECUTE COMMAND", variant="primary")
                 output_text = gr.Textbox(
-                    label="[ SYSTEM OUTPUT ]", 
+                    label="SYSTEM RESPONSE", 
                     interactive=False, 
-                    lines=10
+                    lines=12
                 )
         
         # Action
@@ -211,7 +192,7 @@ with gr.Blocks(theme=gr.themes.Default(), css=custom_css) as rag_application:
 
         # Footer
         with gr.Column(elem_classes="footer"):
-            gr.Markdown("== COMPATIBLE WITH ALL RETRO BROWSERS ==")
+            gr.Markdown("(C) 1992 PDF-BOT SYSTEMS UNLIMITED")
 
 if __name__ == "__main__":
     rag_application.launch(server_name="0.0.0.0", server_port=7860)
