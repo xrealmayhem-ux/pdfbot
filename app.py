@@ -78,85 +78,91 @@ def retriever_qa(file, query):
     except Exception as e:
         return f"SYSTEM FAILURE: {str(e).upper()}"
 
-# 8-BIT RETRO CSS
+# 8-BIT NEON RETRO CSS
 custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-:root {
-    --pixel-border: 4px solid #000;
-}
 
 * {
     font-family: 'Press Start 2P', cursive !important;
     text-transform: uppercase;
 }
 
-body {
-    background-color: #1a1a1a !important;
+body, .gradio-container {
+    background-color: #000000 !important;
 }
 
 .container { 
     max-width: 1000px; 
     margin: auto; 
     padding: 20px;
-    background: #2d2d2d;
-    border: 8px solid #000;
-    box-shadow: 10px 10px 0px #000;
+    background: #000000;
+    border: 6px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
 }
 
 .header { 
     text-align: center; 
     margin-bottom: 40px; 
     padding: 20px;
-    border-bottom: 4px dashed #00ff00;
+    border-bottom: 4px dashed #ff00ff;
 }
 
 .header h1 { 
     font-size: 2.5em; 
-    color: #00ff00;
-    text-shadow: 4px 4px 0px #000;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
 
 .header p { 
-    color: #ffff00; 
+    color: #ff00ff; 
     font-size: 0.8em; 
     margin-top: 15px;
+    text-shadow: 0 0 5px #ff00ff;
 }
 
 .gr-button-primary {
-    background-color: #ff00ff !important;
-    border: 4px solid #000 !important;
-    box-shadow: 4px 4px 0px #000 !important;
-    color: #fff !important;
-    font-size: 0.7em !important;
+    background-color: #000000 !important;
+    border: 4px solid #ffff00 !important;
+    box-shadow: 0 0 10px #ffff00 !important;
+    color: #ffff00 !important;
+    font-size: 0.8em !important;
 }
 
 .gr-button-primary:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px #000 !important;
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    box-shadow: 0 0 30px #ffff00 !important;
 }
 
-input, textarea, .gr-box {
+input, textarea, .gr-box, .gr-form {
     background-color: #000 !important;
     color: #00ff00 !important;
-    border: 4px solid #fff !important;
+    border: 3px solid #00ffff !important;
     border-radius: 0px !important;
+    box-shadow: inset 0 0 10px #00ffff !important;
 }
 
 label {
-    color: #00ffff !important;
-    font-size: 0.6em !important;
-    margin-bottom: 5px;
+    color: #ff00ff !important;
+    font-size: 0.7em !important;
+    margin-bottom: 8px;
+    text-shadow: 0 0 5px #ff00ff;
 }
 
 .footer { 
     text-align: center; 
     margin-top: 50px; 
-    color: #ff0000; 
-    font-size: 0.6em; 
+    color: #00ff00; 
+    font-size: 0.6em;
+    text-shadow: 0 0 5px #00ff00;
 }
 
-/* Hide Gradio default styles that break the look */
+/* Customizing the file upload area */
+.file-preview {
+    background: #000 !important;
+    border: 2px solid #00ff00 !important;
+}
+
 footer { display: none !important; }
 """
 
