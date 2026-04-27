@@ -20,7 +20,6 @@ warnings.filterwarnings('ignore')
 def get_llm():
     llm = HuggingFaceEndpoint(
         repo_id="HuggingFaceH4/zephyr-7b-beta",
-        task="conversational",
         max_new_tokens=512,
         temperature=0.5,
         huggingfacehub_api_token=os.environ.get("HF_TOKEN")
