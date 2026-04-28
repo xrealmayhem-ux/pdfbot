@@ -21,12 +21,13 @@ warnings.filterwarnings('ignore')
 ## LLM
 def get_llm():
     llm = HuggingFaceEndpoint(
-        repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1",
+        repo_id="google/flan-t5-large",
         max_new_tokens=512,
         temperature=0.5,
-        huggingfacehub_api_token=os.environ.get("HF_TOKEN")
+        huggingfacehub_api_token=os.environ.get("HF_TOKEN"),
     )
     return llm
+  
 
 ## Document loader
 def document_loader(file):
@@ -120,7 +121,7 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: Mixtral-8x7B</span>
+    <span class="stat">◈ MODEL: google/flan-t5-large</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
@@ -420,7 +421,7 @@ with gr.Blocks(css=custom_css) as rag_application:
                 <div class='panel-label'>◈ System Status</div>
                 <div class='sysinfo'>
                   <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
-                  <div><span class='key'>LLM     </span> <span class='val'>Mixtral-8x7B</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>google/flan-t5-large</span></div>
                   <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
                   <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
                   <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
