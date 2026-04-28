@@ -345,7 +345,10 @@ input:focus, textarea:focus {
   transform: translateY(-1px);
 }
 
-.output-text .prose {
+.output-text .prose,
+.output-text .gradio-markdown,
+.output-text,
+output-text {
   font-family: var(--mono) !important;
   background: var(--surface) !important;
   backdrop-filter: blur(16px) !important;
