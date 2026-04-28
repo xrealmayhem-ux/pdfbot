@@ -19,7 +19,7 @@ warnings.filterwarnings('ignore')
 ## LLM via InferenceClient
 def query_llm(context, question):
     client = InferenceClient(
-        token=os.environ.get("HF_TOKEN"),
+        api_key=os.environ.get("HF_TOKEN"),
     )
     messages = [
         {
@@ -27,8 +27,8 @@ def query_llm(context, question):
             "content": f"Use the following context to answer the question.\n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
         }
     ]
-    response = client.chat_completion(
-        model="google/gemma-2-2b-it",
+    response = client.chat.completions.create(
+        model="Qwen/Qwen2.5-72B-Instruct:novita",
         messages=messages,
         max_tokens=512,
         temperature=0.5
@@ -109,7 +109,7 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: Mixtral-8x7B</span>
+    <span class="stat">◈ MODEL: Qwen2.5-72B</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
@@ -409,7 +409,7 @@ with gr.Blocks(css=custom_css) as rag_application:
                 <div class='panel-label'>◈ System Status</div>
                 <div class='sysinfo'>
                   <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
-                  <div><span class='key'>LLM     </span> <span class='val'>Mixtral-8x7B</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>Qwen2.5-72B</span></div>
                   <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
                   <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
                   <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
