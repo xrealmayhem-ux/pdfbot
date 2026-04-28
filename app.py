@@ -404,10 +404,7 @@ input:focus, textarea:focus {
 footer { display: none !important; }
 """
 
-with gr.Blocks(css=custom_css, theme=gr.themes.Soft(
-    primary_hue="slate",
-    font_baseline=1.2,
-)) as rag_application:
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate")) as rag_application:
 
     with gr.Column(elem_classes="container"):
 
