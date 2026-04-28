@@ -1,4 +1,5 @@
 langchain-community==0.4.1
+langchain-huggingface==1.2.2
 langchain-text-splitters
 chromadb==1.5.8
 pypdf
