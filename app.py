@@ -345,29 +345,24 @@ input:focus, textarea:focus {
   transform: translateY(-1px);
 }
 
-.output-text .prose,
-.output-text .gradio-markdown,
-.output-text,
-output-text {
+.output-text {
   font-family: var(--mono) !important;
   background: var(--surface) !important;
-  backdrop-filter: blur(16px) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
   border-left: 2px solid var(--accent2) !important;
   border-radius: 8px !important;
   padding: 16px !important;
-  box-shadow: none !important;
   font-size: 13px !important;
   line-height: 1.6 !important;
 }
 
 .output-text strong {
-  color: var(--accent2) !important;
+  color: var(--accent2);
 }
 
 .output-text em {
-  color: var(--warn) !important;
+  color: var(--warn);
 }
 
 .sysinfo {
