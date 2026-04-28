@@ -457,32 +457,32 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate")) as rag
         </div>
         """)
 
-    def init_session(session_state):
-        if session_state is None:
-            session_state = get_or_create_session(None)
-        return session_state
+        def init_session(session_state):
+            if session_state is None:
+                session_state = get_or_create_session(None)
+            return session_state
 
-    def process_query(session_state, file, query):
-        session_state = get_or_create_session(session_state)
-        
-        if file is not None:
-            session_state["current_file"] = file
-        
-        result = retriever_qa(session_state["current_file"], query)
-        
-        session_state = update_session_history(session_state, query, result)
-        
-        return result, session_state
+        def process_query(session_state, file, query):
+            session_state = get_or_create_session(session_state)
+            
+            if file is not None:
+                session_state["current_file"] = file
+            
+            result = retriever_qa(session_state["current_file"], query)
+            
+            session_state = update_session_history(session_state, query, result)
+            
+            return result, session_state
 
-submit_btn.click(
-        fn=init_session,
-        inputs=[session_state],
-        outputs=[session_state]
-    ).then(
-        fn=process_query,
-        inputs=[session_state, file_input, query_input],
-        outputs=[output_text, session_state]
-    )
+        submit_btn.click(
+            fn=init_session,
+            inputs=[session_state],
+            outputs=[session_state]
+        ).then(
+            fn=process_query,
+            inputs=[session_state, file_input, query_input],
+            outputs=[output_text, session_state]
+        )
 
 if __name__ == "__main__":
     rag_application.launch(server_name="0.0.0.0", server_port=7860)
