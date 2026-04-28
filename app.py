@@ -2,13 +2,11 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_huggingface import HuggingFaceEndpoint, HuggingFaceEmbeddings
+from huggingface_hub import InferenceClient
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
 import gradio as gr
 import warnings
 
@@ -18,16 +16,21 @@ def warn(*args, **kwargs):
 warnings.warn = warn
 warnings.filterwarnings('ignore')
 
-## LLM
-def get_llm():
-    llm = HuggingFaceEndpoint(
-        repo_id="google/flan-t5-large",
-        max_new_tokens=512,
-        temperature=0.5,
-        huggingfacehub_api_token=os.environ.get("HF_TOKEN"),
+## LLM via InferenceClient
+def query_llm(context, question):
+    client = InferenceClient(
+        model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+        token=os.environ.get("HF_TOKEN"),
     )
-    return llm
-  
+    prompt = f"""Use the following context to answer the question.
+
+Context: {context}
+
+Question: {question}
+
+Answer:"""
+    response = client.text_generation(prompt, max_new_tokens=512, temperature=0.5)
+    return response
 
 ## Document loader
 def document_loader(file):
@@ -65,39 +68,21 @@ def retriever_qa(file, query):
     if not query:
         return "!!! ERROR: COMMAND LINE EMPTY !!!"
     
-    try:                          # ← debe estar aquí
-        llm = get_llm()
+    try:
         splits = document_loader(file)
         chunks = text_splitter(splits)
         vectordb = vector_database(chunks)
         retriever_obj = vectordb.as_retriever()
 
-        prompt = PromptTemplate.from_template(
-            "Use the following context to answer the question.\n\n"
-            "Context: {context}\n\n"
-            "Question: {question}\n\n"
-            "Answer:"
-        )
+        docs = retriever_obj.invoke(query)
+        context = "\n\n".join(doc.page_content for doc in docs)
+        return query_llm(context, query)
 
-        def format_docs(docs):
-            return "\n\n".join(doc.page_content for doc in docs)
-
-        chain = (
-            {"context": retriever_obj | format_docs, "question": RunnablePassthrough()}
-            | prompt
-            | llm
-            | StrOutputParser()
-        )
-
-        return chain.invoke(query)
-
-    except Exception as e:        # ← y el except al mismo nivel
+    except Exception as e:
         print(f"ERROR: {str(e)}")
         import traceback
         traceback.print_exc()
         return f"!!! SYSTEM HALT: {str(e)} !!!"
-
-        
 
 
 ansi_art = """
@@ -121,7 +106,7 @@ ansi_art = """
   </div>
   <div class="status-bar">
     <span class="stat online">● SYSTEM ONLINE</span>
-    <span class="stat">◈ MODEL: google/flan-t5-large</span>
+    <span class="stat">◈ MODEL: Mixtral-8x7B</span>
     <span class="stat">◈ EMBED: MiniLM-L6</span>
     <span class="stat pulse">◈ AWAITING INPUT</span>
   </div>
@@ -421,7 +406,7 @@ with gr.Blocks(css=custom_css) as rag_application:
                 <div class='panel-label'>◈ System Status</div>
                 <div class='sysinfo'>
                   <div><span class='key'>STATUS  </span> <span class='val ok'>● ONLINE</span></div>
-                  <div><span class='key'>LLM     </span> <span class='val'>google/flan-t5-large</span></div>
+                  <div><span class='key'>LLM     </span> <span class='val'>Mixtral-8x7B</span></div>
                   <div><span class='key'>EMBED   </span> <span class='val'>MiniLM-L6-v2</span></div>
                   <div><span class='key'>VDB     </span> <span class='val'>ChromaDB</span></div>
                   <div><span class='key'>CHUNKS  </span> <span class='val'>1000 / 100</span></div>
