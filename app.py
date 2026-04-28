@@ -10,11 +10,27 @@ from langchain_community.document_loaders import PyPDFLoader
 import gradio as gr
 import warnings
 
-# Suppress warnings
-def warn(*args, **kwargs):
-    pass
-warnings.warn = warn
 warnings.filterwarnings('ignore')
+
+# Session state storage - NOT global, managed by Gradio's per-session State
+user_sessions = {}
+
+def get_or_create_session(user_session_data):
+    if user_session_data is None:
+        user_session_data = {
+            "chat_history": [],
+            "current_file": None,
+            "vectorstore": None,
+        }
+    return user_session_data
+
+def update_session_history(user_session_data, user_query: str, assistant_response: str):
+    if user_session_data is None:
+        user_session_data = get_or_create_session(None)
+    
+    user_session_data["chat_history"].append({"role": "user", "content": user_query})
+    user_session_data["chat_history"].append({"role": "assistant", "content": assistant_response})
+    return user_session_data
 
 ## LLM via InferenceClient
 def query_llm(context, question):
@@ -120,18 +136,18 @@ custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-  --accent:   #5e6ad2;
-  --accent2:  #26b5a0;
-  --danger:   #e05d5d;
-  --warn:     #e0a030;
-  --ok:       #3ecf8e;
-  --bg:       #0d0d12;
-  --surface:  rgba(255,255,255,0.04);
-  --surface2: rgba(255,255,255,0.07);
-  --border:   rgba(255,255,255,0.08);
-  --border2:  rgba(255,255,255,0.14);
-  --text:     #e2e4f0;
-  --muted:    #6b7280;
+  --accent:   #569cd6;
+  --accent2:  #4ec9b0;
+  --danger:   #f14c4c;
+  --warn:     #dcdcaa;
+  --ok:       #6a9955;
+  --bg:       #1e1e1e;
+  --surface:  #252526;
+  --surface2: #2d2d2d;
+  --border:   #3c3c3c;
+  --border2:  #454545;
+  --text:     #d4d4d4;
+  --muted:    #6e7681;
   --mono:     'JetBrains Mono', monospace;
   --sans:     'Inter', sans-serif;
 }
@@ -221,8 +237,8 @@ body, .gradio-container {
   letter-spacing: 1px;
 }
 
-.stat.online { color: var(--ok);   border-color: rgba(62,207,142,0.3); background: rgba(62,207,142,0.08); }
-.stat.pulse  { color: var(--warn); border-color: rgba(224,160,48,0.3);  background: rgba(224,160,48,0.08); animation: flicker 4s infinite; }
+.stat.online { color: var(--ok);   border-color: rgba(106,153,85,0.3); background: rgba(106,153,85,0.08); }
+.stat.pulse  { color: var(--warn); border-color: rgba(220,220,170,0.3);  background: rgba(220,220,170,0.08); animation: flicker 4s infinite; }
 
 @keyframes flicker {
   0%,94%,100% { opacity: 1; }
@@ -284,7 +300,7 @@ input, textarea,
 
 input:focus, textarea:focus {
   border-color: var(--accent) !important;
-  background: rgba(94,106,210,0.06) !important;
+  background: rgba(86,156,214,0.1) !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -388,13 +404,17 @@ input:focus, textarea:focus {
 footer { display: none !important; }
 """
 
-with gr.Blocks(css=custom_css) as rag_application:
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft(
+    primary_hue="slate",
+    font_baseline=1.2,
+)) as rag_application:
 
     with gr.Column(elem_classes="container"):
 
         gr.HTML(ansi_art)
 
         with gr.Row():
+            session_state = gr.State(value=None)
 
             with gr.Column(scale=1):
                 gr.HTML("<div class='panel-label'>◈ Input Node</div>")
@@ -440,10 +460,31 @@ with gr.Blocks(css=custom_css) as rag_application:
         </div>
         """)
 
-    submit_btn.click(
-        fn=retriever_qa,
-        inputs=[file_input, query_input],
-        outputs=output_text
+    def init_session(session_state):
+        if session_state is None:
+            session_state = get_or_create_session(None)
+        return session_state
+
+    def process_query(session_state, file, query):
+        session_state = get_or_create_session(session_state)
+        
+        if file is not None:
+            session_state["current_file"] = file
+        
+        result = retriever_qa(session_state["current_file"], query)
+        
+        session_state = update_session_history(session_state, query, result)
+        
+        return result, session_state
+
+submit_btn.click(
+        fn=init_session,
+        inputs=[session_state],
+        outputs=[session_state]
+    ).then(
+        fn=process_query,
+        inputs=[session_state, file_input, query_input],
+        outputs=[output_text, session_state]
     )
 
 if __name__ == "__main__":
