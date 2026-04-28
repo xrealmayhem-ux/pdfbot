@@ -154,6 +154,11 @@ custom_css = """
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html, body, .gradio-container, .dark, .light {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
 body, .gradio-container {
   background: var(--bg) !important;
   color: var(--text) !important;
@@ -414,13 +419,7 @@ input:focus, textarea:focus {
 footer { display: none !important; }
 """
 
-with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate").set(
-    fill_background_primary="#12121a",
-    fill_secondary="#1a1a25",
-    fill_background="#0a0a0f",
-    text_color="#e0e0ff",
-    text_color_subtle="#6a6a8a",
-)) as rag_application:
+with gr.Blocks(css=custom_css) as rag_application:
 
     with gr.Column(elem_classes="container"):
 
