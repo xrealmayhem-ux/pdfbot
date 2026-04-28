@@ -136,18 +136,18 @@ custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-  --accent:   #569cd6;
-  --accent2:  #4ec9b0;
-  --danger:   #f14c4c;
-  --warn:     #dcdcaa;
-  --ok:       #6a9955;
-  --bg:       #1e1e1e;
-  --surface:  #252526;
-  --surface2: #2d2d2d;
-  --border:   #3c3c3c;
-  --border2:  #454545;
-  --text:     #d4d4d4;
-  --muted:    #6e7681;
+  --accent:   #ff00ff;
+  --accent2:  #00ffff;
+  --danger:   #ff3366;
+  --warn:     #ffff00;
+  --ok:       #00ff66;
+  --bg:       #0a0a0f;
+  --surface:  #12121a;
+  --surface2: #1a1a25;
+  --border:   #2a2a3a;
+  --border2:  #3a3a4a;
+  --text:     #e0e0ff;
+  --muted:    #6a6a8a;
   --mono:     'JetBrains Mono', monospace;
   --sans:     'Inter', sans-serif;
 }
@@ -336,12 +336,11 @@ input:focus, textarea:focus {
 }
 
 .gr-button-primary:hover, button.primary:hover {
-  background: #6e78e0 !important;
+  background: #ff44ff !important;
   transform: translateY(-1px);
 }
 
-[data-testid="textbox"][readonly] textarea,
-.output-text textarea {
+.output-text .prose {
   font-family: var(--mono) !important;
   background: var(--surface) !important;
   backdrop-filter: blur(16px) !important;
@@ -349,7 +348,18 @@ input:focus, textarea:focus {
   border: 1px solid var(--border) !important;
   border-left: 2px solid var(--accent2) !important;
   border-radius: 8px !important;
+  padding: 16px !important;
   box-shadow: none !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+.output-text strong {
+  color: var(--accent2) !important;
+}
+
+.output-text em {
+  color: var(--warn) !important;
 }
 
 .sysinfo {
@@ -404,7 +414,13 @@ input:focus, textarea:focus {
 footer { display: none !important; }
 """
 
-with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate")) as rag_application:
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate").set(
+    fill_background_primary="#12121a",
+    fill_secondary="#1a1a25",
+    fill_background="#0a0a0f",
+    text_color="#e0e0ff",
+    text_color_subtle="#6a6a8a",
+)) as rag_application:
 
     with gr.Column(elem_classes="container"):
 
@@ -443,10 +459,8 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="slate")) as rag
                 )
                 submit_btn = gr.Button("⟫ Execute Query", variant="primary")
                 gr.HTML("<div style='height:8px'></div>")
-                output_text = gr.Textbox(
-                    label="System Response",
-                    interactive=False,
-                    lines=12,
+                output_text = gr.Markdown(
+                    value="*Awaiting input...*",
                     elem_classes="output-text"
                 )
 
