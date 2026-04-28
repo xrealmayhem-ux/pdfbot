@@ -19,18 +19,21 @@ warnings.filterwarnings('ignore')
 ## LLM via InferenceClient
 def query_llm(context, question):
     client = InferenceClient(
-        model="mistralai/Mixtral-8x7B-Instruct-v0.1",
         token=os.environ.get("HF_TOKEN"),
     )
-    prompt = f"""Use the following context to answer the question.
-
-Context: {context}
-
-Question: {question}
-
-Answer:"""
-    response = client.text_generation(prompt, max_new_tokens=512, temperature=0.5)
-    return response
+    messages = [
+        {
+            "role": "user",
+            "content": f"Use the following context to answer the question.\n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
+        }
+    ]
+    response = client.chat_completion(
+        model="google/gemma-2-2b-it",
+        messages=messages,
+        max_tokens=512,
+        temperature=0.5
+    )
+    return response.choices[0].message.content
 
 ## Document loader
 def document_loader(file):
