@@ -4,6 +4,7 @@
 A Retrieval-Augmented Generation (RAG) Question Answering Bot built with LangChain, ChromaDB, and Gradio. This project uses 100% free and open-source models via Hugging Face.
 
 please take a look in hugging face spaces: https://huggingface.co/spaces/XmayhemX/pdfbot
+<img width="1316" height="305" alt="image" src="https://github.com/user-attachments/assets/f8a43587-3dcd-4868-8b07-6e88fa59aee9" />
 
 ## Features
 - **PDF Processing:** Upload PDF files to extract and analyze text.
