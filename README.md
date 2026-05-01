@@ -3,11 +3,13 @@
 
 A Retrieval-Augmented Generation (RAG) Question Answering Bot built with LangChain, ChromaDB, and Gradio. This project uses 100% free and open-source models via Hugging Face.
 
+please take a look in hugging face spaces: https://huggingface.co/spaces/XmayhemX/pdfbot
+
 ## Features
 - **PDF Processing:** Upload PDF files to extract and analyze text.
 - **On-Server Embeddings:** Uses `sentence-transformers/all-MiniLM-L6-v2`, which runs directly on the hosting server's CPU. This means no external API calls or extra costs for vector generation.
 - **Vector Database:** Uses ChromaDB to store and retrieve document chunks efficiently.
-- **LLM:** Powered by `Mistral-7B-Instruct-v0.3` via the free Hugging Face Inference API.
+- **LLM:** Powered by `Qwen2.5-72B` via the free Hugging Face Inference API.
 - **Web Interface:** Built with Gradio for a clean, user-friendly experience.
 
 ## Prerequisites
